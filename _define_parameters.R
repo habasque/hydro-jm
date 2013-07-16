@@ -1,7 +1,6 @@
 ######################################################
 ######## Define parameters
 #-----------------------------------------------------
-# zone
 # dataset_id
 ######################################################
 
@@ -13,7 +12,7 @@ directory_data = 'G:/_sauvegarde_Jeremie/_data/'
 specie = 'Jack Mackerel' # 1 - Jack Mackerel
 catches_unit = 'tons' # 1=tons
 
-dataset_id = '1' #, 1= Acoustic data IMARPE
+dataset_id = '4' #, 1= Acoustic data IMARPE
                  #  2= Acoustic data TASA
                  #  3= Acoustic data IFOP
                  #  4= Catches from Netherlands
@@ -32,7 +31,7 @@ if (dataset_id == 1) {
   sensor = c("SeaWiFS","MODIS","MODIS","AVHRR")
   temporal_resolution = c("8day","1day","8day","1day")
   spatial_resolution = c("9km","4km","4km","4km")
-  #sensors_unit = c("mg/m3","mg/m3","캜","캜")
+  #sensors_unit = c("mg/m3","mg/m3","째C","째C")
   sensors_unit = c("mg/m3","mg/m3","C","C")
   parameter = c("CHL-a","CHL-a","SST","SST")
 }
@@ -53,7 +52,7 @@ if (dataset_id == 3) {
   sensor = c("SeaWiFS","AVHRR")
   temporal_resolution = c("8day","1day")
   spatial_resolution = c("9km","4km")
-  #sensors_unit = c("mg/m3","캜")
+  #sensors_unit = c("mg/m3","째C")
   sensors_unit = c("mg/m3","C")
   parameter = c("CHL-a","SST")
 }
@@ -64,6 +63,12 @@ if (dataset_id == 4) {
   year_end = 2011
   fleet = 'Netherlands'
   data_type = 'catches'
+  sensors_parameters = c("modis.chla","modis.sst","avhrr")
+  parameter = c("CHL-a","SST","SST")
+  sensor = c("MODIS","MODIS","AVHRR")
+  sensors_unit = c("mg/m3","C","C")
+  temporal_resolution = c("8day","8day","1day")
+  spatial_resolution = c("4km","4km","4km")  
 }
 if (dataset_id == 6) {
   zone = 1
@@ -76,7 +81,7 @@ if (dataset_id == 6) {
   sensor = c("MODIS","MODIS")
   temporal_resolution = c("1day","1day")
   spatial_resolution = c("4km","4km")
-  sensors_unit = c("mg/m3","캜")
+  sensors_unit = c("mg/m3","째C")
   parameter = c("CHL-a","SST")
 }
 
