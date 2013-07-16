@@ -3,7 +3,7 @@
 # INPUT : 
 # - dataset_satellite issu de B0 (replace , by . for numeric fields)
 # OUTPUT : 
-# - 
+# - catches distribution
 ##################################################
 
 source('C:/Workspace_R/_define_parameters.R')
@@ -256,7 +256,7 @@ par(opar)
 # Parameter difference between sensor and fleet
 # catches_CJM$SST_IMARPE_MODIS_difference = catches_CJM$avg_r0 - catches_CJM$SST
 #  x11()
-#  hist(catches_CJM$SST_IMARPE_MODIS_difference, 100, main="SST difference between MODIS and fleet measurement", xlab = "SST (Deg °C)")
+#  hist(catches_CJM$SST_IMARPE_MODIS_difference, 100, main="SST difference between MODIS and fleet measurement", xlab = "SST (Deg Â°C)")
 
 #  x11()
 #  plot(catches_CJM$SST, type='l', ylim=c(14,30), main = "SST measured by MODIS and by IMARPE - 1983-2008", ylab = "SST")
