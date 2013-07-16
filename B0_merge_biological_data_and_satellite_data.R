@@ -22,7 +22,7 @@ library(doBy)
 
 if (data_type == "acoustic"){
   directory_dataset <- paste(directory_data, 'acoustic_scientific/', fleet, '/', sep="")
-  filename_dataset <- paste(directory_dataset, 'acoustic_ubm_',year_start,'_',year_end,'.csv', sep="")
+  filename_dataset <- paste(directory_dataset, 'acoustic_data_',year_start,'_',year_end,'.csv', sep="")
 }
 if (data_type == "acoustic_pro"){
   directory_dataset <- paste(directory_data, 'acoustic_fishing_vessels/', fleet, '/', sep="")
@@ -62,7 +62,7 @@ sensor_parameter <- paste(sensor,'.',parameter, sep="")
 directory_dataset_satellite <- paste(directory_dataset, 'With_Satellite_Data/',temporal_resolution,'/',sep="")
 file_satellite_parameter <- dir(directory_dataset_satellite,paste('*',sensor_parameter,'*',sep=""))
 if (length(file_satellite_parameter)>0) { 
-  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********"),skip=12)
+  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********","no_data_available_for_this_date"),skip=12)
   colnames(satellite_parameters) =  c("id_record","year","month","day","latitude","longitude","bathy","seawifs.avg_r0","seawifs.avg_r1","seawifs.avg_r2","seawifs.min_r2","seawifs.max_r2","seawifs.std_r2", "seawifs.mode_r2", "data_file")
   satellite_parameters$id_record <- NULL
   satellite_parameters$data_file <- NULL
@@ -82,11 +82,8 @@ if (length(file_satellite_parameter)>0) {
   dataset_seawifs_b <- unique(dataset_seawifs)
 }
 
-#nb_data_temp <- tapply(dataset_seawifs$Key, list(dataset_seawifs$Key), function(x) length(x))
-#nb_data = as.data.frame(matrix(NA,dim(nb_data_temp)[1],2))
-#colnames(nb_data) = c("KEY","NOMBRE")
-#nb_data$KEY = rep(dimnames(nb_data_temp)[[1]])
-#nb_data$NOMBRE = as.vector(nb_data_temp,"numeric")
+str(dataset_seawifs)
+summary(dataset_seawifs)
 
 ####### adding modis chl data
 if (year_end > 2000) {
@@ -102,7 +99,8 @@ directory_dataset_satellite <- paste(directory_dataset, 'With_Satellite_Data/',t
 file_satellite_parameter <- dir(directory_dataset_satellite,paste('*',sensor_parameter,'*',sep=""))
 if (length(file_satellite_parameter)>0) { 
   satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********"), skip=12)
-  colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","nb_data_avgr0","modis.chla.avg_r0","nb_data_avgr1","modis.chla.avg_r1","nb_data_avgr2","modis.chla.avg_r2","nb_data_avgr3","modis.chla.avg_r3","modis.chla.min_r2","modis.chla.max_r2","modis.chla.std_r2", "modis.chla.mode_r2", "data_file")
+  #colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","nb_data_avgr0","modis.chla.avg_r0","nb_data_avgr1","modis.chla.avg_r1","nb_data_avgr2","modis.chla.avg_r2","nb_data_avgr3","modis.chla.avg_r3","modis.chla.min_r2","modis.chla.max_r2","modis.chla.std_r2", "modis.chla.mode_r2", "data_file")
+  colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","modis.chla.avg_r0","modis.chla.avg_r1","modis.chla.avg_r2","modis.chla.min_r2","modis.chla.max_r2","modis.chla.std_r2", "modis.chla.mode_r2", "data_file")
   satellite_parameters$id_record <- NULL
   satellite_parameters$data_file <- NULL
   satellite_parameters$Key <- paste(satellite_parameters$year,satellite_parameters$month, satellite_parameters$day, round(satellite_parameters$latitude,3), round(satellite_parameters$longitude,3))
@@ -129,7 +127,8 @@ directory_dataset_satellite <- paste(directory_dataset, 'With_Satellite_Data/',t
 file_satellite_parameter <- dir(directory_dataset_satellite,paste('*',sensor_parameter,'*',sep=""))
 if (length(file_satellite_parameter)>0) {
   satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********"), skip=12)
-  colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","nb_data_avgr0","modis.sst.avg_r0","nb_data_avgr1","modis.sst.avg_r1","nb_data_avgr2","modis.sst.avg_r2","nb_data_avgr3","modis.sst.avg_r3","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2", "modis.sst.mode_r2", "data_file")
+  #colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","nb_data_avgr0","modis.sst.avg_r0","nb_data_avgr1","modis.sst.avg_r1","nb_data_avgr2","modis.sst.avg_r2","nb_data_avgr3","modis.sst.avg_r3","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2", "modis.sst.mode_r2", "data_file")
+  colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","modis.sst.avg_r0","modis.sst.avg_r1","modis.sst.avg_r2","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2", "modis.sst.mode_r2", "data_file")
   satellite_parameters$id_record <- NULL
   satellite_parameters$data_file <- NULL
   satellite_parameters$Key = paste(satellite_parameters$year,satellite_parameters$month, satellite_parameters$day, round(satellite_parameters$latitude,3), round(satellite_parameters$longitude,3))
@@ -147,6 +146,11 @@ if (length(file_satellite_parameter)>0) {
   dataset_modis_sst_b <- unique(dataset_modis_sst)
 }
 }
+str(dataset_modis_chl)
+summary(dataset_modis_chl)
+str(dataset_modis_sst)
+summary(dataset_modis_sst)
+
 
 ####### adding avhrr sst data
 sensor <- 'avhrr'
@@ -157,7 +161,7 @@ sensor_parameter <- paste(sensor,'.',parameter, sep="")
 directory_dataset_satellite <- paste(directory_dataset, 'With_Satellite_Data/',temporal_resolution,'/',sep="")
 file_satellite_parameter <- dir(directory_dataset_satellite,paste('*',sensor_parameter,'*',sep=""))
 if (length(file_satellite_parameter)>0) {
-  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********"), skip=12)
+  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********","no data available for this date"), skip=12)
   colnames(satellite_parameters) <-  c("id_record","year","month","day","latitude","longitude","bathy","avhrr.avg_r0","avhrr.avg_r1","avhrr.avg_r2","avhrr.min_r2","avhrr.max_r2","avhrr.std_r2", "avhrr.mode_r2", "data_file")
   satellite_parameters$id_record <- NULL
   satellite_parameters$data_file <- NULL
@@ -175,7 +179,12 @@ if (length(file_satellite_parameter)>0) {
   #deleting duplicated rows
   dataset_avhrr_b <- unique(dataset_avhrr)
 }
+str(dataset_avhrr)
+summary(dataset_avhrr)
 
+
+
+##########################
 if (dataset_id == "3"){
   dataset_satellite <- cbind(dataset_seawifs_b, 
                              #dataset_modis_chl_b$modis.chla.avg_r0, dataset_modis_chl_b$modis.chla.avg_r1, dataset_modis_chl_b$modis.chla.avg_r2, dataset_modis_chl_b$modis.chla.min_r2, dataset_modis_chl_b$modis.chla.max_r2, dataset_modis_chl_b$modis.chla.std_r2, dataset_modis_chl_b$modis.chla.mode_r2,
