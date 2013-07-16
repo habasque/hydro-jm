@@ -19,63 +19,18 @@ col3 = "blue"
 col4 = "green"
 
 #read matrix
-if (dataset_id == "1"  | dataset_id == "3")  {
+if (dataset_id == "1")  {
   directory_acoustic_with_satellite <- paste(directory_data, 'Acoustic_Scientific/', fleet, '/With_Satellite_Data/', sep="")
   filename_acoustic_satellite <- paste(directory_acoustic_with_satellite, "acoustic_scientific_",fleet,"_",year_start,"_",year_end,"_with_satellite_data.csv",sep="")
-  acoustic_satellite <- read.csv2(filename_acoustic_satellite, sep=";", dec=",",header=T)
+  acoustic_satellite <- read.csv2(filename_acoustic_satellite, sep=";", dec=".",header=T)
 }
-
-#fields format
-#acoustic_satellite$Longitude <- as.numeric(acoustic_satellite$Longitude)
-#acoustic_satellite$Latitude <- as.numeric(acoustic_satellite$Latitude)
-#acoustic_satellite$Year <- as.numeric(acoustic_satellite$Year)
-#acoustic_satellite$Month <- as.numeric(acoustic_satellite$Month)
-#acoustic_satellite$Day <- as.numeric(acoustic_satellite$Day)
-acoustic_satellite$CJM <- as.numeric(acoustic_satellite$CJM)
-#acoustic_satellite$SST = as.numeric(acoustic_satellite$SST)
-if (dataset_id == "1") {
-  acoustic_satellite$Anch = as.numeric(acoustic_satellite$Anch)
-  acoustic_satellite$Sard = as.numeric(acoustic_satellite$Sard)
-  acoustic_satellite$Cab = as.numeric(acoustic_satellite$Cab)
-  acoustic_satellite$DC = as.numeric(acoustic_satellite$DC)
-  acoustic_satellite$DSB = as.numeric(acoustic_satellite$DSB)
-  acoustic_satellite$Depth = as.numeric(acoustic_satellite$Depth)
+if (dataset_id == "3")  {
+  directory_acoustic_with_satellite <- paste(directory_data, 'Acoustic_Scientific/', fleet, '/With_Satellite_Data/', sep="")
+  filename_acoustic_satellite <- paste(directory_acoustic_with_satellite, "acoustic_ubm_",fleet,"_",year_start,"_",year_end,"_with_satellite_data.csv",sep="")
+  acoustic_satellite <- read.csv2(filename_acoustic_satellite, sep=";", dec=".",header=T)
 }
-acoustic_satellite$bathy = as.numeric(acoustic_satellite$bathy)
-
-acoustic_satellite$seawifs.avg_r0 = as.numeric(acoustic_satellite$seawifs.avg_r0)
-acoustic_satellite$seawifs.avg_r1 = as.numeric(acoustic_satellite$seawifs.avg_r1)
-acoustic_satellite$seawifs.avg_r2 = as.numeric(acoustic_satellite$seawifs.avg_r2)
-acoustic_satellite$seawifs.std_r2 = as.numeric(acoustic_satellite$seawifs.std_r2)
-acoustic_satellite$seawifs.mode_r2 = as.numeric(acoustic_satellite$seawifs.mode_r2)
-acoustic_satellite$seawifs.min_r2 = as.numeric(acoustic_satellite$seawifs.min_r2)
-acoustic_satellite$seawifs.max_r2 = as.numeric(acoustic_satellite$seawifs.max_r2)
-
-acoustic_satellite$avhrr.avg_r0 = as.numeric(acoustic_satellite$avhrr.avg_r0)
-acoustic_satellite$avhrr.avg_r1 = as.numeric(acoustic_satellite$avhrr.avg_r1)
-acoustic_satellite$avhrr.avg_r2 = as.numeric(acoustic_satellite$avhrr.avg_r2)
-acoustic_satellite$avhrr.std_r2 = as.numeric(acoustic_satellite$avhrr.std_r2)
-acoustic_satellite$avhrr.mode_r2 = as.numeric(acoustic_satellite$avhrr.mode_r2)
-acoustic_satellite$avhrr.min_r2 = as.numeric(acoustic_satellite$avhrr.min_r2)
-acoustic_satellite$avhrr.max_r2 = as.numeric(acoustic_satellite$avhrr.max_r2)
-
-if (year_end > 2001) {
-  acoustic_satellite$modis.sst.avg_r0 = as.numeric(acoustic_satellite$modis.sst.avg_r0)
-  acoustic_satellite$modis.sst.avg_r1 = as.numeric(acoustic_satellite$modis.sst.avg_r1)
-  acoustic_satellite$modis.sst.avg_r2 = as.numeric(acoustic_satellite$modis.sst.avg_r2)
-  acoustic_satellite$modis.sst.std_r2 = as.numeric(acoustic_satellite$modis.sst.std_r2)
-  acoustic_satellite$modis.sst.mode_r2 = as.numeric(acoustic_satellite$modis.sst.mode_r2)
-  acoustic_satellite$modis.sst.min_r2 = as.numeric(acoustic_satellite$modis.sst.min_r2)
-  acoustic_satellite$modis.sst.max_r2 = as.numeric(acoustic_satellite$modis.sst.max_r2)
-  
-  acoustic_satellite$modis.chla.avg_r0 = as.numeric(acoustic_satellite$modis.chla.avg_r0)
-  acoustic_satellite$modis.chla.avg_r1 = as.numeric(acoustic_satellite$modis.chla.avg_r1)
-  acoustic_satellite$modis.chla.avg_r2 = as.numeric(acoustic_satellite$modis.chla.avg_r2)
-  acoustic_satellite$modis.chla.std_r2 = as.numeric(acoustic_satellite$modis.chla.std_r2)
-  acoustic_satellite$modis.chla.mode_r2 = as.numeric(acoustic_satellite$modis.chla.mode_r2)
-  acoustic_satellite$modis.chla.min_r2 = as.numeric(acoustic_satellite$modis.chla.min_r2)
-  acoustic_satellite$modis.chla.max_r2 = as.numeric(acoustic_satellite$modis.chla.max_r2)
-}
+str(acoustic_satellite)
+summary(acoustic_satellite)
 
 ######## Jack Mackerel selection
 
@@ -86,7 +41,7 @@ if (dataset_id == "3") {
   acoustic_CJM <- subset(acoustic_satellite, CJM > 0)
 }
 
-### parameter statistics
+######## parameter statistics
 for (i in 1:length(sensors_parameters)){
   
   field_all <- paste("acoustic_satellite$",sensors_parameters[i],".avg_r0",sep="")
@@ -164,6 +119,11 @@ for (i in 1:length(sensors_parameters)){
   } else {
     legend("topright", c("avg rad=0", "avg rad=1", "avg rad=2"), lwd = 2, col = c(col1, col2, col3))  
   }
+  
+  #bathymetry
+  field <- paste("acoustic_CJM$bathy",sep="")
+  x11()
+  hist(eval(parse(text=field)), 100,main = paste(dataset,"\n CJM detections\nBathymetry - ", year_start, "-", year_end, "\n", sep=""), xlab = "Bathymetry (meters)", ylab ="Frecuency", col = col1)
   
 }
 
@@ -274,7 +234,7 @@ summary(model_lm)
 # Parameter difference between sensor and fleet
 # acoustic_CJM$SST_IMARPE_MODIS_difference = acoustic_CJM$avg_r0 - acoustic_CJM$SST
 #  x11()
-#  hist(acoustic_CJM$SST_IMARPE_MODIS_difference, 100, main="SST difference between MODIS and fleet measurement", xlab = "SST (Deg °C)")
+#  hist(acoustic_CJM$SST_IMARPE_MODIS_difference, 100, main="SST difference between MODIS and fleet measurement", xlab = "SST (Deg Â°C)")
 
 #  x11()
 #  plot(acoustic_CJM$SST, type='l', ylim=c(14,30), main = "SST measured by MODIS and by IMARPE - 1983-2008", ylab = "SST")
