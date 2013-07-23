@@ -62,7 +62,7 @@ sensor_parameter <- paste(sensor,'.',parameter, sep="")
 directory_dataset_satellite <- paste(directory_dataset, 'With_Satellite_Data/',temporal_resolution,'/',sep="")
 file_satellite_parameter <- dir(directory_dataset_satellite,paste('*',sensor_parameter,'*',sep=""))
 if (length(file_satellite_parameter)>0) { 
-  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********","no_data_available_for_this_date"),skip=12)
+  satellite_parameters <- read.csv(paste(directory_dataset_satellite,file_satellite_parameter,sep=""), sep= "", header=FALSE, na.strings = c("NaN","********"),skip=12)
   colnames(satellite_parameters) =  c("id_record","year","month","day","latitude","longitude","bathy","seawifs.avg_r0","seawifs.avg_r1","seawifs.avg_r2","seawifs.min_r2","seawifs.max_r2","seawifs.std_r2", "seawifs.mode_r2", "data_file")
   satellite_parameters$id_record <- NULL
   satellite_parameters$data_file <- NULL
@@ -185,6 +185,21 @@ summary(dataset_avhrr)
 
 
 ##########################
+if (dataset_id == "1"){
+  dataset <- orderBy(~ Key, dataset)
+  dataset_seawifs_b <- orderBy(~ Key, dataset_seawifs_b)
+  dataset_modis_chl_b <- orderBy(~ Key, dataset_modis_chl_b)
+  dataset_modis_sst_b <- orderBy(~ Key, dataset_modis_sst_b)
+  dataset_avhrr_b <- orderBy(~ Key, dataset_avhrr_b)
+  dataset_satellite <- cbind(dataset_seawifs_b, 
+                             dataset_modis_chl_b$modis.chla.avg_r0, dataset_modis_chl_b$modis.chla.avg_r1, dataset_modis_chl_b$modis.chla.avg_r2, dataset_modis_chl_b$modis.chla.min_r2, dataset_modis_chl_b$modis.chla.max_r2, dataset_modis_chl_b$modis.chla.std_r2, dataset_modis_chl_b$modis.chla.mode_r2,
+                             dataset_modis_sst_b$modis.sst.avg_r0, dataset_modis_sst_b$modis.sst.avg_r1, dataset_modis_sst_b$modis.sst.avg_r2, dataset_modis_sst_b$modis.sst.min_r2, dataset_modis_sst_b$modis.sst.max_r2, dataset_modis_sst_b$modis.sst.std_r2, dataset_modis_sst_b$modis.sst.mode_r2, 
+                             dataset_avhrr_b$avhrr.avg_r0, dataset_avhrr_b$avhrr.avg_r1, dataset_avhrr_b$avhrr.avg_r2, dataset_avhrr_b$avhrr.min_r2, dataset_avhrr_b$avhrr.max_r2, dataset_avhrr_b$avhrr.std_r2, dataset_avhrr_b$avhrr.mode_r2)
+  colnames(dataset_satellite) =  c(colnames(dataset_seawifs_b),"modis.chla.avg_r0","modis.chla.avg_r1","modis.chla.avg_r2","modis.chla.min_r2","modis.chla.max_r2","modis.chla.std_r2","modis.chla.mode_r2",
+                                   "modis.sst.avg_r0","modis.sst.avg_r1","modis.sst.avg_r2","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2","modis.sst.mode_r2",
+                                   "avhrr.avg_r0","avhrr.avg_r1","avhrr.avg_r2","avhrr.min_r2","avhrr.max_r2","avhrr.std_r2","avhrr.mode_r2")
+}
+
 if (dataset_id == "3"){
   dataset_satellite <- cbind(dataset_seawifs_b, 
                              #dataset_modis_chl_b$modis.chla.avg_r0, dataset_modis_chl_b$modis.chla.avg_r1, dataset_modis_chl_b$modis.chla.avg_r2, dataset_modis_chl_b$modis.chla.min_r2, dataset_modis_chl_b$modis.chla.max_r2, dataset_modis_chl_b$modis.chla.std_r2, dataset_modis_chl_b$modis.chla.mode_r2,
@@ -213,15 +228,7 @@ if (dataset_id == "4"){
                                    "modis.sst.avg_r0","modis.sst.avg_r1","modis.sst.avg_r2","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2","modis.sst.mode_r2",
                                    "avhrr.avg_r0","avhrr.avg_r1","avhrr.avg_r2","avhrr.min_r2","avhrr.max_r2","avhrr.std_r2","avhrr.mode_r2")
 }
-if (dataset_id == "1"){
-  dataset_satellite <- cbind(dataset_seawifs_b, 
-                             dataset_modis_chl_b$modis.chla.avg_r0, dataset_modis_chl_b$modis.chla.avg_r1, dataset_modis_chl_b$modis.chla.avg_r2, dataset_modis_chl_b$modis.chla.min_r2, dataset_modis_chl_b$modis.chla.max_r2, dataset_modis_chl_b$modis.chla.std_r2, dataset_modis_chl_b$modis.chla.mode_r2,
-                             dataset_modis_sst_b$modis.sst.avg_r0, dataset_modis_sst_b$modis.sst.avg_r1, dataset_modis_sst_b$modis.sst.avg_r2, dataset_modis_sst_b$modis.sst.min_r2, dataset_modis_sst_b$modis.sst.max_r2, dataset_modis_sst_b$modis.sst.std_r2, dataset_modis_sst_b$modis.sst.mode_r2, 
-                             dataset_avhrr_b$avhrr.avg_r0, dataset_avhrr_b$avhrr.avg_r1, dataset_avhrr_b$avhrr.avg_r2, dataset_avhrr_b$avhrr.min_r2, dataset_avhrr_b$avhrr.max_r2, dataset_avhrr_b$avhrr.std_r2, dataset_avhrr_b$avhrr.mode_r2)
-  colnames(dataset_satellite) =  c(colnames(dataset_seawifs_b),"modis.chla.avg_r0","modis.chla.avg_r1","modis.chla.avg_r2","modis.chla.min_r2","modis.chla.max_r2","modis.chla.std_r2","modis.chla.mode_r2",
-                                   "modis.sst.avg_r0","modis.sst.avg_r1","modis.sst.avg_r2","modis.sst.min_r2","modis.sst.max_r2","modis.sst.std_r2","modis.sst.mode_r2",
-                                   "avhrr.avg_r0","avhrr.avg_r1","avhrr.avg_r2","avhrr.min_r2","avhrr.max_r2","avhrr.std_r2","avhrr.mode_r2")
-}
+
 if (dataset_id == "6"){
   #sort data.frame before cbind
   dataset <- orderBy(~ Key, dataset)
@@ -245,10 +252,12 @@ if (data_type == "catches"){
 
 #dataset_satellite$Key <- NULL;
 
-write.csv2(dataset_satellite, file=filenameout, row.names = FALSE, quote=FALSE)
+write.csv(dataset_satellite, file=filenameout, row.names = FALSE, quote=FALSE)
 
 ###### checking file
 summary(dataset_satellite)
+str(dataset_satellite)
+
 if (dataset_id == "1"){
   head(subset(dataset_satellite, avhrr.avg_r0 > 0 & modis.sst.avg_r0 >0 & modis.chla.avg_r0 > 0 & seawifs.avg_r0 > 0))
 }
