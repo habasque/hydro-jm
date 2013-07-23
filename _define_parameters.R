@@ -12,12 +12,14 @@ directory_data = 'G:/_sauvegarde_Jeremie/_data/'
 specie = 'Jack Mackerel' # 1 - Jack Mackerel
 catches_unit = 'tons' # 1=tons
 
-dataset_id = '4' #, 1= Acoustic data IMARPE
+dataset_id = '6' #, 1= Acoustic data IMARPE
                  #  2= Acoustic data TASA
                  #  3= Acoustic data IFOP
                  #  4= Catches from Netherlands
                  #  5= Catches from Russia
                  #  6= Catches from Peru
+                 #  7= Catches from Chile SPRFMO 2010-2011
+                 #  8= Catches from Chile 2004-2006
 
 if (dataset_id == 1) {
   zone = 1
@@ -70,6 +72,14 @@ if (dataset_id == 4) {
   temporal_resolution = c("8day","8day","1day")
   spatial_resolution = c("4km","4km","4km")  
 }
+if (dataset_id == 5) {
+  zone = 1
+  dataset = "Catches data collected by Russian fishing fleet"
+  year_start = 1986
+  year_end = 1991
+  fleet = 'Russia'
+  data_type = 'catches'
+}
 if (dataset_id == 6) {
   zone = 1
   dataset = "Catches data collected by Peruvian fishing fleet"
@@ -83,6 +93,14 @@ if (dataset_id == 6) {
   spatial_resolution = c("4km","4km")
   sensors_unit = c("mg/m3","°C")
   parameter = c("CHL-a","SST")
+}
+if (dataset_id == 8) {
+  zone = 1
+  dataset = "Catches data collected by Chilean fishing fleet"
+  year_start = 2004
+  year_end = 2006
+  fleet = 'Chile'
+  data_type = 'catches'
 }
 
 #geographical parameters
@@ -116,7 +134,7 @@ if (zone == 4) {
 }
 
 #study area
-filename_shoreline <- read.table(paste(directory_data,'Shorelines/gshhs_crude.txt',sep=''));
+filename_shoreline <- read.table(paste(directory_data,'Shorelines/gshhs_intermediate.txt',sep=''));
 filename_shoreline$V1 <- filename_shoreline$V1 -360;
 #x11()
 #plot(filename_shoreline$V1,filename_shoreline$V2, xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max), xlab='Longitude', ylab ='Latitude', main="Study area", type='l')
