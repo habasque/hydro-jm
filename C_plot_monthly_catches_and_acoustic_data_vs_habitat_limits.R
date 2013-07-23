@@ -4,11 +4,13 @@
 # INPUT :
 # - SST AVHRR monthly climatology 18km - 1982-2011
 # - CHL MODIS monthly climatology 18km - 2003-2011
-# - Dutch catches 2005-2011
 # - Acoustic scientific Chile 1997-1999
 # - Acoustic scientific Peru 1983-2011
+# - Dutch catches 2005-2011
 # - Peru catches 2011-2013
-# - Chilean catches 2010-2011
+# - Chilean catches SPRFMO 2010-2011
+# - Chilean catches 2004-2006
+# - Russian catches 1986-1991
 ##############################################################################
 
 source('C:/Workspace_R/_define_parameters.R')
@@ -95,7 +97,28 @@ catches_Chile$Longitude <- as.numeric(catches_Chile$Longitude)
 catches_Chile$Latitude <- as.numeric(catches_Chile$Latitude)
 catches_Chile$Month <- as.numeric(catches_Chile$Month)
 catches_Chile$Year <- as.numeric(catches_Chile$Year)
+# filename Chilean catches bis
+fleet = 'Chile'
+year_start <- 2004
+year_end <- 2006
+filename_catches <- paste(directory_data, 'Catches/', fleet, '/Catches_',year_start,'_',year_end,'.csv', sep="")
+catches_Chile_b <- read.csv(filename_catches, header=TRUE, sep=";", dec=".",colClasses = "character")
+catches_Chile_b$Longitude <- as.numeric(catches_Chile_b$Longitude)
+catches_Chile_b$Latitude <- as.numeric(catches_Chile_b$Latitude)
+catches_Chile_b$Month <- as.numeric(catches_Chile_b$Month)
+catches_Chile_b$Year <- as.numeric(catches_Chile_b$Year)
 
+
+# filename Russian catches
+fleet = 'Russia'
+year_start <- 1986
+year_end <- 1991
+filename_catches <- paste(directory_data, 'Catches/', fleet, '/Catches_',year_start,'_',year_end,'.csv', sep="")
+catches_Russia <- read.csv(filename_catches, header=TRUE, sep=";", dec=".",colClasses = "character")
+catches_Russia$Longitude <- as.numeric(catches_Russia$Longitude)
+catches_Russia$Latitude <- as.numeric(catches_Russia$Latitude)
+catches_Russia$Month <- as.numeric(catches_Russia$Month)
+catches_Russia$Year <- as.numeric(catches_Russia$Year)
 
 # filename international catches month
 fleet <- 'International'
@@ -192,6 +215,8 @@ catches_Peru <- subset(catches_Peru, CJM > 0)
 points(catches_Peru$Longitude, catches_Peru$Latitude, col ='darkgreen',pch='.')
 #catches Chile 2010-2011
 points(catches_Chile$Longitude, catches_Chile$Latitude, col ='black')
+#catches Chile 2004-2006
+points(catches_Chile_b$Longitude, catches_Chile_b$Latitude, col ='orange')
 #shoreline
 lines(filename_shoreline)
 
@@ -204,27 +229,9 @@ legend("top", c("Netherlands catches 2005-2011",
 
 # for each month
 for (ind_month in 1:12) {
-  
-  
-  sst_month <- sst[,,ind_month]
-  #par(new=TRUE)
-  #contour(lon,lat,sst_month, levels = lowest_temperature,col="blue",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
-  #par(new=TRUE)
-  #contour(lon,lat,sst_month, levels = highest_temperature,col="red",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
-  
-  chla_month <- chla[,,ind_month]
-  #par(new=TRUE)
-  #contour(lon,lat,chla_month, levels = lowest_chla,col="darkgreen",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
-  #par(new=TRUE)
-  #contour(lon,lat,chla_month, levels = lowest_chla_Peru,col="darkgreen",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
-  
-  #shoreline
-  lines(filename_shoreline)
-  
-  #shelfbreak
-  if (zone == 1) {
-    lines(ShelfBreakPosition)
-  }
+    
+  sst_month <- sst[,,ind_month]  
+  chla_month <- chla[,,ind_month] 
   
   #ZEE (marineregions.org)
   #library(maps)
@@ -245,14 +252,15 @@ for (ind_month in 1:12) {
   lat_pacific <- lat[lat>= lat_min & lat <= lat_max]
   y_model <- matrix(NaN,c(dim(chla_month_pacific)[[1]]))
   for (i in 1:length(chla_month_pacific)){
-    y_model[i] <- 9 + ((450*chla_month_pacific[i])/(1+(26*chla_month_pacific[i])))
+    y_model[i] <- 9 + ((500*chla_month_pacific[i])/(1+(26*chla_month_pacific[i])))
   }
   
   species_presence_pacific[sst_month_pacific > y_model] <- 0
   
   # plot
   x11(width=15,height=8,pointsize=12)
-  image(lon_pacific,lat_pacific,species_presence_pacific, col=rev(brewer.pal(9,"RdBu")), xlab='Longitude', ylab ='Latitude', 
+  image(lon_pacific,lat_pacific,species_presence_pacific, col=rev(brewer.pal(9,"RdBu")), 
+        xlab='Longitude', ylab ='Latitude', xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max),
         main= paste("Catches and acoustic data points from 1983 to 2011 vs horizontal habitat limits - Month ", ind_month,
                     "\nSST >= 9°C & SST<=26°C, CHLa >= 0.07 mg/m3 and interaction model between SST and CHLa", sep=""))
  
@@ -300,9 +308,17 @@ for (ind_month in 1:12) {
   catches_CJM_Peru_month <- subset(catches_Peru, CJM > 0 & Month == ind_month) 
   points(catches_CJM_Peru_month$Longitude, catches_CJM_Peru_month$Latitude, col ='black',pch='.')
 
-  #catches Chile by month
+  #catches Chile SPRFMO by month
   catches_CJM_Chile_month <- subset(catches_Chile, Month == ind_month) 
   points(catches_CJM_Chile_month$Longitude, catches_CJM_Chile_month$Latitude, col ='yellow')
+  
+  #catches Chile by month
+  catches_CJM_Chile_b_month <- subset(catches_Chile_b, Month == ind_month) 
+  points(catches_CJM_Chile_b_month$Longitude, catches_CJM_Chile_b_month$Latitude, col ='red')
+  
+  #catches Russia by month
+  catches_CJM_Russia_month <- subset(catches_Russia, Month == ind_month) 
+  points(catches_CJM_Russia_month$Longitude, catches_CJM_Russia_month$Latitude, col ='blue')
   
   # filename acoustic fishing vessels Peru
   #fleet = 'Peru' # Peru, Chile, Netherlands
@@ -314,8 +330,29 @@ for (ind_month in 1:12) {
   #acoustic_data_TASA$Latitud = as.numeric(acoustic_data_TASA$Latitud)
   #acoustic_CJM_TASA = subset(acoustic_data_TASA, Pesca_grande > 0)
   #points(acoustic_CJM_TASA$Longitud, acoustic_CJM_TASA$Latitud, col ='black')
+  #par(new=TRUE)
+  #contour(lon,lat,chla_month, levels = lowest_chla,col="darkgreen",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
+  #par(new=TRUE)
+  #contour(lon,lat,chla_month, levels = lowest_chla_Peru,col="darkgreen",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
   
-  legend("top", c("Netherlands catches 2005-2011", "Published data from IMARPE acoustic surveys 1983-2011", "Published data from IFOP acoustic surveys 1997-1999","Peruvian catches 2011-2013","Chilean catches 2010-2011"), lwd = 2, col = c("green","orange","pink","black","yellow"))
+  
+  #par(new=TRUE)
+  #contour(lon,lat,sst_month, levels = lowest_temperature,col="blue",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
+  #par(new=TRUE)
+  #contour(lon,lat,sst_month, levels = highest_temperature,col="red",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max))
+  #par(new=TRUE)
+  contour(lon,lat,sst_month, levels = 9,col="black",xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max),add=TRUE)
+  
+  
+  #shoreline
+  lines(filename_shoreline,col="yellow")
+  
+  #shelfbreak
+  if (zone == 1) {
+    lines(ShelfBreakPosition)
+  }
+  
+  legend("top", c("Netherlands catches 2005-2011", "Published data from IMARPE acoustic surveys 1983-2011", "Published data from IFOP acoustic surveys 1997-1999","Peruvian catches 2011-2013","Chilean catches 2010-2011","Chilean catches 2004-2006"), lwd = 2, col = c("green","orange","pink","black","yellow","red"))
   #legend("top", c("Netherlands catches 2005-2011", "Published data from IMARPE acoustic surveys 1983-2011", "Published data from IFOP acoustic surveys 1997-1999","Peruvian catches 2011-2013","Lowest temperature limit (9°C isoline from AVHRR monthly climatology)", "Highest temperature limit (26°C isoline from AVHRR monthly climatology)","CHL 0.07 mg/m3 isoline (MODIS monthly climatology)"), lwd = 2, col = c("green","orange","pink","black","blue","red","darkgreen"))
   #legend("top", c("Netherlands catches 2005-2011","Lowest temperature limit (9°C isoline from WOA monthly climatology)", "Highest temperature limit (26°C isoline from WOA monthly climatology)","CHL 0.07 mg/m3 isoline (SeaWIFS mean climatology)"), lwd = 2, col = c("red","blue","green","orange","darkgreen"))
   
