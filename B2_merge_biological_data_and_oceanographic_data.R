@@ -3,7 +3,7 @@
 #-----------------------------------------------------------------------------
 # INPUT :
 # - biological dataset (either acoustic or catches) !!! HAVE TO BE SORTED !!!
-# - Monthly 9°C isotherme climatology from WOA
+# - Monthly 9Â°C isotherme climatology from WOA
 # - Monthly 2ml/L dissolved oxygen climatology from WOA
 # 
 # OUTPUT :
@@ -44,7 +44,7 @@ catches$Key <- paste(catches$Month, catches$Longitude, catches$Latitude, sep="")
 #for each month
 for (ind_month in 1:12) {
  
-   #isotherme 9°C dataframe transposition
+   #isotherme 9Â°C dataframe transposition
    isotherme_9_month <- isotherme_9[,,ind_month]
    data_frame_isotherme_9 <- as.data.frame(matrix(NA,dim(isotherme_9)[1]*dim(isotherme_9)[2],3))
    colnames(data_frame_isotherme_9) <- c("Longitude","Latitude","depth_iso_9")
@@ -62,8 +62,12 @@ for (ind_month in 1:12) {
    data_frame_isoO2_2$depth_isoO2_2 <- as.vector(isoO2_2_month)
    xy.isoO2_2 <- cbind(data_frame_isoO2_2$Longitude, data_frame_isoO2_2$Latitude)   
    
-   #monthly catches selection
-   catches_CJM_month <- subset(catches, CJM > 0 & Month == ind_month) 
+   #CJM monthly catches selection
+   if (dataset_id == "1") {
+      catches_CJM_month <- subset(catches, CJM > 0 & Anch == 0 & Sard == 0 & Month == ind_month) 
+   } else {
+      catches_CJM_month <- subset(catches, CJM > 0 & Month == ind_month)
+   }
    catches_CJM_month$Key <- paste(catches_CJM_month$Month, catches_CJM_month$Longitude, catches_CJM_month$Latitude, sep="")   
    pts_catches <- matrix(c(catches_CJM_month$Longitude,catches_CJM_month$Latitude), ncol = 2)
    
@@ -105,5 +109,9 @@ tapply(catches$depth_isoO2_2, list(catches$Month), mean, na.rm=T)
 tapply(catches$depth_isoO2_2, list(catches$Month), median, na.rm=T)
 tapply(catches$depth_isoO2_2, list(catches$Month), max, na.rm=T)
 
+##################### write matrix with all fields
+catches$Key <- NULL
+filenameout <- paste(filename, 'with_oceanographic_data.csv', sep="")
+write.csv(catches, file=filenameout, row.names=FALSE, quote=FALSE)
 
 
