@@ -13,19 +13,13 @@
 
 source('C:/Workspace_R/_define_parameters.R')
 library(sp)
-library(plyr)
 library(ggplot2)
 
 # filename catches 
 filename_catches <- paste(directory_data, 'Catches/', fleet, '/Catches_',year_start,'_',year_end,'.csv', sep="")
-catches <- read.csv(filename_catches, header=TRUE, sep=";", dec=".",colClasses = "character")
-catches$Longitude <- as.numeric(catches$Longitude)
-catches$Latitude <- as.numeric(catches$Latitude)
-catches$Year <- as.numeric(catches$Year)
-catches$Month <- as.numeric(catches$Month)
-catches$Day <- as.numeric(catches$Day)
-catches$CJM <- as.numeric(catches$CJM)
-catches$SST = as.numeric(catches$SST)
+catches <- read.csv(filename_catches, header=TRUE, sep=";", dec=".")
+str(catches)
+summary(catches)
 
 #Adding distance to coast
 catches$DistanceToCoast <- NaN * dim(catches)[1]
@@ -36,8 +30,22 @@ for (i in 1:nrow(pts)) {
   catches[i,]$DistanceToCoast <- min(spDistsN1(xy.coast, pts[i,], longlat = TRUE))
 }
 
+#Adding distance to shelfbreak
+catches$DistanceToShelfbreak <- NaN * dim(catches)[1]
+filename_shelfbreak <- subset(ShelfBreakPosition, Latitude <10 & Latitude >-60 &  Longitude> -220 & Longitude < -70)
+xy.shelfbreak <- cbind(filename_shelfbreak$Longitude, filename_shelfbreak$Latitude)[!is.na(filename_shelfbreak$Longitude), ]
+pts <- matrix(c(catches$Longitude,catches$Latitude), ncol = 2)
+for (i in 1:nrow(pts)) {
+  catches[i,]$DistanceToShelfbreak <- min(spDistsN1(xy.shelfbreak, pts[i,], longlat = TRUE))
+}
+
 ################### Jack Mackerel selection ###################
 catches_CJM <- subset(catches, CJM > 0)
+
+#plot rond proportionnel a CJM
+x11()
+#qplot(Longitude, Latitude,data=catches_CJM, facets=Year~.,colour=CJM)+ scale_colour_gradient(low="red", high="blue")
+qplot(Longitude, Latitude,data=catches_CJM, facets=Year~Month, main="Chilean catches distribution 2007-2012")
 
 #number of data by year/month
 tapply(catches_CJM$CJM, list(catches_CJM$Year, catches_CJM$Month), function(x) length(x))
@@ -149,6 +157,8 @@ plot(distmax$Month, distmax$DistanceToCoast, type= 'l')
 tapply(catches_CJM$DistanceToCoast, list(catches_CJM$Year, catches_CJM$Month)), min)
 tapply(catches_CJM$DistanceToCoast, list(catches_CJM$Year, catches_CJM$Month)), max)
 
+#distance to shelfbreak
+
 
 ### catches histogram
 x11()
@@ -184,7 +194,7 @@ for (i in 1:length(listeMonth)) {
 
 ### SST vs catches
 x11()
-plot(catches_CJM$SST, log(catches_CJM$Catches), main = paste("Catches (log) ", specie, ' in relation with SST\n', fleet, ' - ', year_start,' - ',year_end ,sep=""), xlab ="SST (Deg °C)", ylab ="log(Catches)", col = 'black')
+plot(catches_CJM$SST, log(catches_CJM$Catches), main = paste("Catches (log) ", specie, ' in relation with SST\n', fleet, ' - ', year_start,' - ',year_end ,sep=""), xlab ="SST (Deg Â°C)", ylab ="log(Catches)", col = 'black')
 savePlot(filename=paste(directory_data, 'Catches/', fleet,'/Figures/SST_vs_catches.png', sep=""),type =c("png"))
 
 
