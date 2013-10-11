@@ -6,18 +6,12 @@
 ### - acoustic data from IFOP 1997-1999
 ### - catches data from Dutch fleet 2005-2011
 ### - catches data from Peruvian fleet 2011-2013
+### - catches data from Chilean fleet 2007-2012
 ### OUTPUT :
 ### - all_biology_data_with_satellite_data.csv
 ######################################################
 
 source('C:/Workspace_R/_define_parameters.R')
-
-library(tweedie)
-library(scatterplot3d)
-library(car)
-library(quantreg)
-library(MASS)
-library(splines)
 
 col1 = "black"
 col2 = "red"
@@ -50,7 +44,7 @@ year_start <- 2005
 year_end <- 2011
 directory_catches_with_satellite <- paste(directory_data, 'Catches/', fleet, '/With_Satellite_Data/', sep="")
 filename_catches_netherlands <- paste(directory_catches_with_satellite, "catches_",year_start,"_",year_end,"_with_satellite_data.csv",sep="")
-catches_netherlands <- read.csv(filename_catches_netherlands, sep=";", dec=".",header=T)
+catches_netherlands <- read.csv(filename_catches_netherlands, sep=",", dec=".",header=T)
 str(catches_netherlands)
 
 #read matrix catches Peru
@@ -62,11 +56,59 @@ filename_catches_peru <- paste(directory_catches_with_satellite, "catches_",year
 catches_peru <- read.csv(filename_catches_peru, sep=";", dec=".",header=T)
 str(catches_peru)
 
+#read matrix catches Chile
+fleet <- 'Chile'
+year_start <- 2007
+year_end <- 2012
+directory_catches_with_satellite <- paste(directory_data, 'Catches/', fleet, '/With_Satellite_Data/', sep="")
+filename_catches_chile <- paste(directory_catches_with_satellite, "Catches_",year_start,"_",year_end,"_with_satellite_data.csv",sep="")
+catches_chile <- read.csv(filename_catches_chile, sep=",", dec=".",header=T)
+str(catches_chile)
+
+
 ######################### selecting jack mackerel records
-dataset_cjm_model_peru <- subset(acoustic_satellite_peru, Anch == 0 & Sard == 0 & CJM >= 0)
-dataset_cjm_model_chile <- subset(acoustic_satellite_chile, CJM >= 0)
-dataset_cjm_model_netherlands <- subset(catches_netherlands, CJM >= 0)
-dataset_cjm_model_catches_peru <- subset(catches_peru, CJM >= 0)
+
+acoustic_satellite_peru_cjm <- subset(acoustic_satellite_peru, Anch == 0 & Sard == 0 & CJM >= 0)
+acoustic_satellite_chile_cjm <- subset(acoustic_satellite_chile, CJM >= 0)
+catches_netherlands_cjm <- subset(catches_netherlands, CJM >= 0)
+catches_peru_cjm <- subset(catches_peru, CJM >= 0)
+catches_chile_cjm <- subset(catches_chile, CJM >= 0)
+
+######################### combining datasets
+
+# seawifs.avg_r2 and avhrr.avg_r2
+acoustic_satellite_peru_cjm$dataset_id <- 1
+dataset_peru_fields <- data.frame(acoustic_satellite_peru_cjm$dataset_id, acoustic_satellite_peru_cjm$Year, acoustic_satellite_peru_cjm$Month, acoustic_satellite_peru_cjm$Day, acoustic_satellite_peru_cjm$Latitude, acoustic_satellite_peru_cjm$Longitude, acoustic_satellite_peru_cjm$bathy, acoustic_satellite_peru_cjm$CJM, acoustic_satellite_peru_cjm$seawifs.avg_r2, acoustic_satellite_peru_cjm$avhrr.avg_r2)
+colnames(dataset_peru_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","Bathy","CJM","CHLA","SST")
+
+# seawifs.avg_r2 and avhrr.avg_r2
+acoustic_satellite_chile_cjm$dataset_id <- 3
+dataset_chile_fields <- data.frame(acoustic_satellite_chile_cjm$dataset_id, acoustic_satellite_chile_cjm$Year, acoustic_satellite_chile_cjm$Month, acoustic_satellite_chile_cjm$Day, acoustic_satellite_chile_cjm$Latitude, acoustic_satellite_chile_cjm$Longitude, acoustic_satellite_chile_cjm$bathy , acoustic_satellite_chile_cjm$CJM, acoustic_satellite_chile_cjm$seawifs.avg_r2, acoustic_satellite_chile_cjm$avhrr.avg_r2)
+colnames(dataset_chile_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","Bathy","CJM","CHLA","SST")
+
+#modis.chla.avg_r2 and modis.sst.avg_r2
+catches_netherlands_cjm$dataset_id <- 4
+dataset_netherlands_fields <- data.frame(catches_netherlands_cjm$dataset_id, catches_netherlands_cjm$Year, catches_netherlands_cjm$Month, catches_netherlands_cjm$Day, catches_netherlands_cjm$Latitude, catches_netherlands_cjm$Longitude, catches_netherlands_cjm$Bathymetry, catches_netherlands_cjm$CJM, catches_netherlands_cjm$modis.chla.avg_r2, catches_netherlands_cjm$modis.sst.avg_r2)
+colnames(dataset_netherlands_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","Bathy","CJM","CHLA","SST")
+
+#modis.chla.avg_r2 and modis.sst.avg_r0
+catches_peru_cjm$dataset_id <- 6
+dataset_catches_peru_fields <- data.frame(catches_peru_cjm$dataset_id, catches_peru_cjm$Year, catches_peru_cjm$Month, catches_peru_cjm$Day, catches_peru_cjm$Latitude, catches_peru_cjm$Longitude, catches_peru_cjm$Bathymetry, catches_peru_cjm$CJM, catches_peru_cjm$modis.chla.avg_r2, catches_peru_cjm$modis.sst.avg_r0)
+colnames(dataset_catches_peru_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","Bathy","CJM","CHLA","SST")
+
+#modis.chla.avg_r2 and modis.sst.avg_r2
+catches_chile_cjm$dataset_id <- 9
+dataset_catches_chile_fields <- data.frame(catches_chile_cjm$dataset_id, catches_chile_cjm$year, catches_chile_cjm$month, catches_chile_cjm$day, catches_chile_cjm$latitude, catches_chile_cjm$longitude, catches_chile_cjm$bathy, catches_chile_cjm$CJM, catches_chile_cjm$modis.chla.avg_r2, catches_chile_cjm$modis.sst.avg_r2)
+colnames(dataset_catches_chile_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","Bathy","CJM","CHLA","SST")
+
+
+######################### concatenation records of the 4 datasets
+dataset_global <- rbind(dataset_peru_fields, rbind(dataset_chile_fields,rbind(dataset_netherlands_fields,rbind(dataset_catches_peru_fields,dataset_catches_chile_fields))))
+write.csv(dataset_global, file=paste(directory_data,'all_biology_data_with_satellite_data.csv',sep=""),row.names=FALSE,quote=FALSE)
+
+
+tapply(dataset_global$dataset_id, list(dataset_global$dataset_id), function(x) length(x))
+
 
 x11()
 plot(dataset_cjm_model_netherlands$Longitude, dataset_cjm_model_netherlands$Latitude, xlim=c(lon_min,lon_max), ylim=c(lat_min,lat_max), xlab='Longitude', ylab ='Latitude', main=paste("Catches and acoustic data points from 1983 to 2013"), col="red")
@@ -80,26 +122,6 @@ legend("top", c("Netherlands catches 2005-2011",
                lwd = 2, col = c("red","blue","green"))
 #shoreline
 lines(filename_shoreline)
-
-######################### fields selection (1 field CJM, 1 field for CHL-a, 1 field for SST)
-dataset_cjm_model_peru$dataset_id <- 1
-dataset_cjm_model_peru_fields <- data.frame(dataset_cjm_model_peru$dataset_id, dataset_cjm_model_peru$Year, dataset_cjm_model_peru$Month, dataset_cjm_model_peru$Day, dataset_cjm_model_peru$Latitude, dataset_cjm_model_peru$Longitude, dataset_cjm_model_peru$CJM, dataset_cjm_model_peru$seawifs.avg_r0, dataset_cjm_model_peru$avhrr.avg_r0)
-colnames(dataset_cjm_model_peru_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","CJM","CHLA","SST")
-
-dataset_cjm_model_chile$dataset_id <- 3
-dataset_cjm_model_chile_fields <- data.frame(dataset_cjm_model_chile$dataset_id, dataset_cjm_model_chile$Year, dataset_cjm_model_chile$Month, dataset_cjm_model_chile$Day, dataset_cjm_model_chile$Latitude, dataset_cjm_model_chile$Longitude, dataset_cjm_model_chile$CJM, dataset_cjm_model_chile$seawifs.avg_r0, dataset_cjm_model_chile$avhrr.avg_r0)
-colnames(dataset_cjm_model_chile_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","CJM","CHLA","SST")
-
-dataset_cjm_model_netherlands$dataset_id <- 4
-dataset_cjm_model_netherlands_fields <- data.frame(dataset_cjm_model_netherlands$dataset_id, dataset_cjm_model_netherlands$Year, dataset_cjm_model_netherlands$Month, dataset_cjm_model_netherlands$Day, dataset_cjm_model_netherlands$Latitude, dataset_cjm_model_netherlands$Longitude, dataset_cjm_model_netherlands$CJM, dataset_cjm_model_netherlands$modis.chla.avg_r0, dataset_cjm_model_netherlands$avhrr.avg_r0)
-colnames(dataset_cjm_model_netherlands_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","CJM","CHLA","SST")
-
-dataset_cjm_model_catches_peru$dataset_id <- 6
-dataset_cjm_model_catches_peru_fields <- data.frame(dataset_cjm_model_catches_peru$dataset_id, dataset_cjm_model_catches_peru$Year, dataset_cjm_model_catches_peru$Month, dataset_cjm_model_catches_peru$Day, dataset_cjm_model_catches_peru$Latitude, dataset_cjm_model_catches_peru$Longitude, dataset_cjm_model_catches_peru$CJM, dataset_cjm_model_catches_peru$modis.chla.avg_r0, dataset_cjm_model_catches_peru$modis.sst.avg_r0)
-colnames(dataset_cjm_model_catches_peru_fields) <- c("dataset_id","Year","Month","Day","Latitude","Longitude","CJM","CHLA","SST")
-
-######################### concatenation records of the 4 datasets
-dataset_cjm_model <- rbind(dataset_cjm_model_peru_fields, rbind(dataset_cjm_model_chile_fields,rbind(dataset_cjm_model_netherlands_fields,dataset_cjm_model_catches_peru_fields)))
 
 ######################### presence/absence field
 dataset_cjm_model$presence_absence <- recode(dataset_cjm_model$CJM, '0=0; else = 1', as.factor.result=FALSE)
@@ -186,3 +208,4 @@ str(dataset_cjm_model_sans_na)
 summary(dataset_cjm_model_sans_na)
 
 tapply(dataset_cjm_model_sans_na$dataset_id, list(dataset_cjm_model_sans_na$dataset_id,dataset_cjm_model_sans_na$presence_absence), function(x) length(x))
+
